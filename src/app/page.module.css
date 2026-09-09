@@ -1,0 +1,50 @@
+.main {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 40px 16px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: gray;
+  margin-bottom: 32px;
+}
+
+.emptyState {
+  padding: 32px;
+  text-align: center;
+  color: gray;
+  border: 1px solid lightgray;
+}
+
+.categoryList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.categoryCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid lightgray;
+  margin-bottom: 12px;
+  text-decoration: none;
+  color: black;
+}
+
+.categoryName {
+  font-weight: bold;
+}
+
+.categoryCount {
+  font-size: 14px;
+  color: gray;
+}
