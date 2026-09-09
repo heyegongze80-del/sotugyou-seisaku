@@ -1,10 +1,10 @@
 {
-  "name": "next-training",
+  "name": "sotugyou-seisaku",
   "dockerComposeFile": "../docker-compose.yml",
   "service": "app",
   "workspaceFolder": "/app",
   "shutdownAction": "stopCompose",
-  "forwardPorts": [3000],
+  "forwardPorts": [3000, 5555],
   "postCreateCommand": "pnpm install",
   "customizations": {
     "vscode": {
