@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    container_name: next-training-app
+    volumes:
+      - .:/app                      # ソースコードをマウント
+      - node_modules:/app/node_modules  # node_modules は名前付きボリュームで高速化
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    command: sleep infinity         # Dev Container 用に待機させる
+
+volumes:
+  node_modules:
