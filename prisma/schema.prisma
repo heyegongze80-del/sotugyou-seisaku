@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -12,9 +7,78 @@ datasource db {
   provider = "postgresql"
 }
 
-model Todo {
-  id        Int      @id @default(autoincrement())
-  title     String
-  done      Boolean  @default(false)
-  createdAt DateTime @default(now())
+// カテゴリーテーブル
+model Category {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique @db.VarChar(50)
+  description String? @db.VarChar(255)
+
+  questions    Question[]
+  quizAttempts QuizAttempt[]
+
+  @@map("categories")
+}
+
+// 設問テーブル
+model Question {
+  id           Int      @id @default(autoincrement())
+  categoryId   Int      @map("category_id")
+  questionText String   @map("question_text")
+  explanation  String?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  category    Category     @relation(fields: [categoryId], references: [id])
+  choices     Choice[]
+  quizAnswers QuizAnswer[]
+
+  @@index([categoryId])
+  @@map("questions")
+}
+
+// 選択肢テーブル
+model Choice {
+  id           Int     @id @default(autoincrement())
+  questionId   Int     @map("question_id")
+  choiceText   String  @map("choice_text") @db.VarChar(255)
+  isCorrect    Boolean @default(false) @map("is_correct")
+  displayOrder Int     @default(0) @map("display_order")
+
+  question    Question     @relation(fields: [questionId], references: [id])
+  quizAnswers QuizAnswer[]
+
+  @@index([questionId])
+  @@map("choices")
+}
+
+// 挑戦履歴テーブル
+model QuizAttempt {
+  id             Int       @id @default(autoincrement())
+  categoryId     Int       @map("category_id")
+  totalQuestions Int       @map("total_questions")
+  correctCount   Int       @default(0) @map("correct_count")
+  startedAt      DateTime  @default(now()) @map("started_at")
+  finishedAt     DateTime? @map("finished_at")
+
+  category    Category     @relation(fields: [categoryId], references: [id])
+  quizAnswers QuizAnswer[]
+
+  @@index([categoryId])
+  @@map("quiz_attempts")
+}
+
+// 回答明細テーブル
+model QuizAnswer {
+  id         Int     @id @default(autoincrement())
+  attemptId  Int     @map("attempt_id")
+  questionId Int     @map("question_id")
+  choiceId   Int     @map("choice_id")
+  isCorrect  Boolean @map("is_correct")
+
+  attempt  QuizAttempt @relation(fields: [attemptId], references: [id])
+  question Question    @relation(fields: [questionId], references: [id])
+  choice   Choice      @relation(fields: [choiceId], references: [id])
+
+  @@index([attemptId])
+  @@index([questionId])
+  @@map("quiz_answers")
 }
