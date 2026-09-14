@@ -14,7 +14,7 @@ export default async function Home() {
     include: {
       // 各カテゴリーに紐づくquestions(設問)の「件数」だけを一緒に取得する
       // 中身の問題文まで全部取得すると重いので、件数だけに絞っている
-      //_count
+      //_count　Prismaが自動的に用意している特殊な機能で、「関連するテーブルの行数を数える」ために使います
       _count:{
         select:{questions:true},
       },

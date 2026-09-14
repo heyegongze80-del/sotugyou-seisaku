@@ -67,3 +67,4 @@ model QuizAnswer {
   question Question    @relation(fields: [questionId], references: [id])
   choice   Choice      @relation(fields: [choiceId], references: [id])
 }
+
