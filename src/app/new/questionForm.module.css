@@ -1,0 +1,77 @@
+/* ページ全体を中央寄せし、横幅を制限する */
+.main {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 40px 16px;
+}
+
+/* 見出し「問題を作成」の文字サイズ */
+.title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 24px;
+}
+
+/* フォーム全体を縦に並べる */
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 1つの入力項目(ラベル+入力欄+エラー文)のかたまりの下に余白を付ける */
+.field {
+  margin-bottom: 16px;
+}
+
+/* 各入力欄のラベル文字 */
+.label {
+  display: block;
+  font-size: 13px;
+  color: gray;
+  margin-bottom: 6px;
+}
+
+/* 通常のテキスト入力欄 */
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid lightgray;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+/* 問題文・解説文のような複数行入力欄 */
+.textarea {
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 12px;
+  border: 1px solid lightgray;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+/* ラジオボタン+選択肢テキスト入力を横並びにする行 */
+.choiceRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* 送信ボタン */
+.submitButton {
+  padding: 12px 20px;
+  background-color: black;
+  color: white;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* エラーメッセージ用のスタイル(今回追加した部分) */
+.error {
+  min-height: 1.2rem; /* エラーがない時も高さを確保し、表示時にガタつかないようにする */
+  margin-top: 4px;
+  font-size: 13px;
+  color: #d32f2f; /* 赤系の色でエラーだと分かるようにする */
+}
