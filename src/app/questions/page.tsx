@@ -18,9 +18,15 @@ export default async function QuestionsPage() {
     <main className={styles.main}>
       <div className={styles.header}>
         <h1 className={styles.title}>登録済みの問題</h1>
-        <Link href="/questions/new" className={styles.newLink}>
-          + 新規作成
-        </Link>
+        <div className={styles.headerLinks}>
+          {/* クイズを選ぶトップページへ戻るリンク */}
+          <Link href="/" className={styles.homeLink}>
+            トップページへ戻る
+          </Link>
+          <Link href="/questions/new" className={styles.newLink}>
+            + 新規作成
+          </Link>
+        </div>
       </div>
 
       {questions.length === 0 ? (

@@ -79,3 +79,12 @@
 .resultDetail {
   color: gray;
 }
+
+.homeLink {
+  display: inline-block;
+  margin-top: 24px;
+  padding: 10px 20px;
+  background-color: black;
+  color: white;
+  text-decoration: none;
+}

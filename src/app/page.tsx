@@ -25,7 +25,13 @@ export default async function Home() {
 
   return (
     <main className={styles.main}>
-      <h1 className={styles.title}>クイズチャレンジ</h1>
+      <div className={styles.header}>
+        <h1 className={styles.title}>クイズチャレンジ</h1>
+        {/* 問題の作成・削除を行う編集画面へのリンク */}
+        <Link href="/questions" className={styles.editLink}>
+          問題を編集
+        </Link>
+      </div>
       <p className={styles.subtitle}>挑戦したいカテゴリーを選んでください</p>
 
       {/* カテゴリーが1件もない場合と、ある場合で表示を出し分ける */}

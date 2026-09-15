@@ -2,6 +2,7 @@
 
 // useEffectを追加:「画面表示時に自動で1回だけ実行したい処理」のために使う
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import styles from "./quiz.module.css";
 // 先ほど作った3つのサーバー側関数を読み込む
 import {
@@ -102,6 +103,10 @@ export function QuizClient({ categoryId, categoryName, questions }: Props) {
         <p className={styles.resultDetail}>
           {categoryName} ・ {total}問中 {correctCount}問正解
         </p>
+        {/* Linkを使うと画面全体を再読み込みせずにトップページへ遷移できる */}
+        <Link href="/" className={styles.homeLink}>
+          トップページへ戻る
+        </Link>
       </main>
     );
   }

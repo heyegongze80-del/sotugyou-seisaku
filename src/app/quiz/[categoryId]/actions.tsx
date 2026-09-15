@@ -1,4 +1,5 @@
-// この中の関数は必ずサーバー側で実行される
+// "use server"を付けるとNext.jsがAPIエンドポイントを自動生成し、フォーム送信時に呼び出されます。
+// APIルートを手書きする必要がありません。
 "use server";
 
 import { prisma } from "@/lib/prisma";
