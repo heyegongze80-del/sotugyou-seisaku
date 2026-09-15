@@ -1,11 +1,15 @@
 "use client";
 
-// useStateは「画面の状態(今何問目か、など)を覚えておく」ためのReactの仕組み
-import { useState } from "react";
+// useEffectを追加:「画面表示時に自動で1回だけ実行したい処理」のために使う
+import { useEffect, useState } from "react";
 import styles from "./quiz.module.css";
+// 先ほど作った3つのサーバー側関数を読み込む
+import {
+  startQuizAttempt,
+  recordQuizAnswer,
+  finishQuizAttempt,
+} from "./actions";
 
-// このコンポーネントが受け取るデータの型を定義しておく
-// page.tsxから渡されるquestionsの中身の形と一致させる
 type Choice = {
   id: number;
   choiceText: string;
@@ -20,56 +24,73 @@ type Question = {
 };
 
 type Props = {
+  categoryId: number; // 追加:挑戦履歴作成に必要
   categoryName: string;
   questions: Question[];
 };
 
-export function QuizClient({ categoryName, questions }: Props) {
-  // 今何問目を表示しているか(0から始まる添字)
+export function QuizClient({ categoryId, categoryName, questions }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  // ユーザーが選んだ選択肢のID(まだ選んでいなければnull)
   const [selectedChoiceId, setSelectedChoiceId] = useState<number | null>(
     null
   );
-
-  // これまで正解した数
   const [correctCount, setCorrectCount] = useState(0);
-
-  // 全問終わったかどうか
   const [finished, setFinished] = useState(false);
 
-  // 今表示している問題
+  // 追加:今回の挑戦履歴(quiz_attempts)のidを覚えておくState
+  // まだDBに作られていない間はnull
+  const [attemptId, setAttemptId] = useState<number | null>(null);
+
+  // 追加:画面が最初に表示されたタイミングで、1回だけ挑戦履歴を作る
+  // 依存配列を空配列[]にしているのは「最初の1回だけ実行したい」という意図を示すため
+  // (React基本フックの章で習った、useEffectの基本パターンそのもの)
+  useEffect(() => {
+    startQuizAttempt(categoryId, questions.length).then((id) => {
+      setAttemptId(id);
+    });
+  }, [categoryId, questions.length]);
+
   const currentQuestion = questions[currentIndex];
 
   // 選択肢がクリックされたときの処理
-  function handleSelectChoice(choice: Choice) {
-    // すでに回答済みなら、二重に押せないようにする
+  // DBへの書き込み(await)を行うため、asyncを付ける
+  async function handleSelectChoice(choice: Choice) {
     if (selectedChoiceId !== null) return;
 
     setSelectedChoiceId(choice.id);
 
-    // 選んだ選択肢が正解なら、正解数を1増やす
     if (choice.isCorrect) {
       setCorrectCount((prev) => prev + 1);
+    }
+
+    // attemptIdがまだ用意できていない場合(通信中など)は記録をスキップする
+    // (万が一のタイミングのずれに備えた安全策)
+    if (attemptId !== null) {
+      await recordQuizAnswer({
+        attemptId,
+        questionId: currentQuestion.id,
+        choiceId: choice.id,
+        isCorrect: choice.isCorrect,
+      });
     }
   }
 
   // 「次の問題へ」ボタンが押されたときの処理
-  function handleNext() {
+  async function handleNext() {
     const isLastQuestion = currentIndex === questions.length - 1;
 
     if (isLastQuestion) {
-      // 最後の問題だったら、結果画面に切り替える
+      // 最後の問題だったら、挑戦履歴を確定させてから結果画面に切り替える
+      if (attemptId !== null) {
+        await finishQuizAttempt(attemptId, correctCount);
+      }
       setFinished(true);
     } else {
-      // 次の問題に進み、選択状態をリセットする
       setCurrentIndex((prev) => prev + 1);
       setSelectedChoiceId(null);
     }
   }
 
-  // 全問終わった後は、結果画面を表示する
   if (finished) {
     const total = questions.length;
     const rate = Math.round((correctCount / total) * 100);
@@ -85,14 +106,12 @@ export function QuizClient({ categoryName, questions }: Props) {
     );
   }
 
-  // 選んだ選択肢のオブジェクトを取得しておく(正誤表示のために使う)
   const selectedChoice = currentQuestion.choices.find(
     (c) => c.id === selectedChoiceId
   );
 
   return (
     <main className={styles.main}>
-      {/* 進捗表示: 「1 / 3問」のような表示 */}
       <p className={styles.progress}>
         {categoryName} ・ {currentIndex + 1} / {questions.length}問
       </p>
@@ -101,17 +120,13 @@ export function QuizClient({ categoryName, questions }: Props) {
 
       <div className={styles.choiceList}>
         {currentQuestion.choices.map((choice) => {
-          // 回答済みかどうかで、ボタンの見た目を変える
           const isAnswered = selectedChoiceId !== null;
           const isSelected = choice.id === selectedChoiceId;
 
-          // クラス名を条件によって組み立てる
           let className = styles.choiceButton;
           if (isAnswered && choice.isCorrect) {
-            // 正解の選択肢は、回答後は常に緑で示す
             className += " " + styles.correct;
           } else if (isAnswered && isSelected && !choice.isCorrect) {
-            // 自分が選んだ不正解の選択肢は赤で示す
             className += " " + styles.incorrect;
           }
 
@@ -128,7 +143,6 @@ export function QuizClient({ categoryName, questions }: Props) {
         })}
       </div>
 
-      {/* 回答した後だけ、正誤・解説・次へボタンを表示する */}
       {selectedChoice && (
         <div className={styles.feedback}>
           <p className={styles.verdict}>

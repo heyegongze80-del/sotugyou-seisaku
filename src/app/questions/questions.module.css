@@ -1,0 +1,80 @@
+/* ページ全体を中央寄せし、横幅を制限する */
+.main {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 40px 16px;
+}
+
+/* 見出しと「新規作成」リンクを横並びにする */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* 「新規作成」へのリンク */
+.newLink {
+  font-size: 14px;
+  color: black;
+  text-decoration: none;
+  border: 1px solid black;
+  padding: 6px 12px;
+}
+
+/* 問題が1件もないときの案内文 */
+.emptyState {
+  padding: 32px;
+  text-align: center;
+  color: gray;
+  border: 1px solid lightgray;
+}
+
+/* 問題一覧の外枠(ul要素のデフォルトの点・余白を消す) */
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* 問題1件分の行。左に問題文、右に削除ボタンを並べる */
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid lightgray;
+  margin-bottom: 10px;
+  gap: 12px;
+}
+
+.itemBody {
+  flex: 1; /* 残りの横幅いっぱいに広がる */
+}
+
+/* カテゴリー名の表示(小さめ・グレー) */
+.itemCategory {
+  font-size: 12px;
+  color: gray;
+  margin-bottom: 4px;
+}
+
+.itemText {
+  font-size: 14px;
+}
+
+/* 削除ボタン(赤系にして、危険な操作だと分かるようにする) */
+.deleteButton {
+  padding: 8px 14px;
+  background-color: white;
+  color: #d32f2f;
+  border: 1px solid #d32f2f;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap; /* ボタンの文字が折り返されないようにする */
+}
