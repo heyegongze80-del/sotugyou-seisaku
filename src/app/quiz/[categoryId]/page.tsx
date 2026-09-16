@@ -1,3 +1,4 @@
+//
 // notFoundは「該当データが無い場合に404ページを表示する」ためのNext.js標準の関数
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -6,8 +7,10 @@ import { QuizClient } from "./QuizClient";
 // Next.jsのApp Routerでは、フォルダ名の[categoryId]がそのままURLの動的な部分になる
 // 例: /quiz/1 にアクセスすると、categoryId には "1" という文字列が入ってくる
 export default async function QuizPage({
+  //実際の値の取り出し方(分割代入)
   params,
 }: {
+  //その値の「形」を説明する注釈
   params: Promise<{ categoryId: string }>;
 }) {
   // paramsはPromise(非同期の値)なので、awaitで中身を取り出す
@@ -19,7 +22,11 @@ export default async function QuizPage({
   // 該当カテゴリーと、それに紐づく設問・選択肢を一度に取得する
   const category = await prisma.category.findUnique({
     where: { id: categoryIdNumber },
-    include: {questions: {include:{choices:{
+    include: 
+    {questions: 
+      {include:
+        {choices:
+          {
             // 選択肢はdisplay_orderの昇順(登録順)に並べる
             orderBy: { displayOrder: "asc" },
           },

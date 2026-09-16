@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import styles from "./quiz.module.css";
 // 先ほど作った3つのサーバー側関数を読み込む
+//DBを操作するサーバー側の関数("use server"が付いているファイルから読み込んでいる)
 import {
   startQuizAttempt,
   recordQuizAnswer,
@@ -31,15 +32,19 @@ type Props = {
 };
 
 export function QuizClient({ categoryId, categoryName, questions }: Props) {
+  //DBを操作するサーバー側の関数("use server"が付いているファイルから読み込んでいる)
   const [currentIndex, setCurrentIndex] = useState(0);
+  //クリックした選択肢のid(未回答ならnull)
   const [selectedChoiceId, setSelectedChoiceId] = useState<number | null>(
     null
   );
+  //	正解数の累計
   const [correctCount, setCorrectCount] = useState(0);
+  //	結果画面に切り替えるかどうか
   const [finished, setFinished] = useState(false);
 
-  // 追加:今回の挑戦履歴(quiz_attempts)のidを覚えておくState
-  // まだDBに作られていない間はnull
+  // 今回の挑戦履歴(quiz_attempts)のidを覚えておくState
+  // 	DBに作った挑戦履歴のid(未作成ならnull)
   const [attemptId, setAttemptId] = useState<number | null>(null);
 
   // ガード無しだと挑戦履歴(quiz_attempts)が2行作られてしまうため、
@@ -49,28 +54,38 @@ export function QuizClient({ categoryId, categoryName, questions }: Props) {
 
   // 画面が最初に表示されたタイミングで、1回だけ挑戦履歴を作る
   useEffect(() => {
+    //hasStartedRef.currentがtrueなら、ここで処理を終了する
     if (hasStartedRef.current) return;
+    //「もう実行した」という印を、箱の中に書き込んでル。
     hasStartedRef.current = true;
+
+    //Promiseの中身の準備ができたら、この関数を実行して
     startQuizAttempt(categoryId, questions.length).then((id) => {
+      //受け取ったidを、Stateに保存しています。これで画面(コンポーネント)側からattemptIdが使えるようになります。
       setAttemptId(id);
     });
   }, [categoryId, questions.length]);
 
+  //配列は[番号]で中身を取り出せます。currentIndexが0なら1問目のデータが入ります。
   const currentQuestion = questions[currentIndex];
 
   // 選択肢がクリックされたときの処理
   // DBへの書き込み(await)を行うため、asyncを付ける
+  //もう回答済みなら何もしない(連打防止)
   async function handleSelectChoice(choice: Choice) {
     if (selectedChoiceId !== null) return;
 
+    //クリックされた選択肢のidをStateに記録
     setSelectedChoiceId(choice.id);
-
+    
+    //正解なら正解数を1増やす
     if (choice.isCorrect) {
       setCorrectCount((prev) => prev + 1);
     }
 
     // attemptIdがまだ用意できていない場合(通信中など)は記録をスキップする
     // (万が一のタイミングのずれに備えた安全策)
+    //attemptIdが用意できていれば、DBに「この問題にこの選択肢で回答した」という記録を1行追加する
     if (attemptId !== null) {
       await recordQuizAnswer({
         attemptId,
@@ -83,6 +98,7 @@ export function QuizClient({ categoryId, categoryName, questions }: Props) {
 
   // 「次の問題へ」ボタンが押されたときの処理
   async function handleNext() {
+    //今の番号が、最後の問題の番号と同じか判定
     const isLastQuestion = currentIndex === questions.length - 1;
 
     if (isLastQuestion) {
@@ -99,6 +115,7 @@ export function QuizClient({ categoryId, categoryName, questions }: Props) {
 
   if (finished) {
     const total = questions.length;
+    //正答率を計算
     const rate = Math.round((correctCount / total) * 100);
 
     return (
@@ -116,6 +133,8 @@ export function QuizClient({ categoryId, categoryName, questions }: Props) {
     );
   }
 
+  //.find(条件)は「配列の中から条件に一致する最初の1つ」を探します。
+  //ここでは「クリックされた選択肢そのもの」を取り出しています。何も選んでいなければundefinedになります。
   const selectedChoice = currentQuestion.choices.find(
     (c) => c.id === selectedChoiceId
   );
@@ -123,6 +142,7 @@ export function QuizClient({ categoryId, categoryName, questions }: Props) {
   return (
     <main className={styles.main}>
       <p className={styles.progress}>
+        {/**currentIndexは0始まりなので、人間向けの表示は+ 1しています */}
         {categoryName} ・ {currentIndex + 1} / {questions.length}問
       </p>
 
@@ -133,13 +153,18 @@ export function QuizClient({ categoryId, categoryName, questions }: Props) {
           const isAnswered = selectedChoiceId !== null;
           const isSelected = choice.id === selectedChoiceId;
 
+          //let if文でclassNameの中身を書き換える(追加する)必要があるから
           let className = styles.choiceButton;
           if (isAnswered && choice.isCorrect) {
+            //なぜ" "(半角スペース)を挟むのか?
+            // HTMLのclass属性は、複数のクラス名を半角スペース区切りで書くルール
             className += " " + styles.correct;
+            //回答済み、かつ、この選択肢が選ばれたもの、かつ、正解ではない
           } else if (isAnswered && isSelected && !choice.isCorrect) {
             className += " " + styles.incorrect;
           }
 
+          //classNameの組み立てにif文が必要だったため、{}とreturnを使う通常の書き方にした
           return (
             <button
               key={choice.id}
@@ -153,11 +178,14 @@ export function QuizClient({ categoryId, categoryName, questions }: Props) {
         })}
       </div>
 
+
+        {/**何か選択済みのときだけ表示(&&は左がtrueっぽい値のときだけ右を評価する) */}
       {selectedChoice && (
         <div className={styles.feedback}>
           <p className={styles.verdict}>
             {selectedChoice.isCorrect ? "正解です" : "不正解です"}
           </p>
+          {/**解説文があるときだけ表示 */}
           {currentQuestion.explanation && (
             <p className={styles.explanation}>
               {currentQuestion.explanation}
