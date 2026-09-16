@@ -44,6 +44,8 @@ export default async function QuizPage({
 
   // ここまでで取得したデータを、実際に画面を動かすクライアントコンポーネントに渡す
   return (
-    <QuizClient   categoryId={categoryIdNumber}  categoryName={category.name} questions={category.questions} />
+    <QuizClient categoryId={categoryIdNumber} 
+    categoryName={category.name}
+    questions={category.questions} />
   );
 }

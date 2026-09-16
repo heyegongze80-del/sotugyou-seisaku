@@ -1,7 +1,7 @@
 "use client";
 
 // useEffectを追加:「画面表示時に自動で1回だけ実行したい処理」のために使う
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import styles from "./quiz.module.css";
 // 先ほど作った3つのサーバー側関数を読み込む
@@ -42,10 +42,15 @@ export function QuizClient({ categoryId, categoryName, questions }: Props) {
   // まだDBに作られていない間はnull
   const [attemptId, setAttemptId] = useState<number | null>(null);
 
-  // 追加:画面が最初に表示されたタイミングで、1回だけ挑戦履歴を作る
-  // 依存配列を空配列[]にしているのは「最初の1回だけ実行したい」という意図を示すため
-  // (React基本フックの章で習った、useEffectの基本パターンそのもの)
+  // ガード無しだと挑戦履歴(quiz_attempts)が2行作られてしまうため、
+  // useRefで「もう実行したか」を覚えておき、2回目以降は何もしない
+  // (useStateにしないのは、値が変わっても再描画を起こす必要が無いため)
+  const hasStartedRef = useRef(false);
+
+  // 画面が最初に表示されたタイミングで、1回だけ挑戦履歴を作る
   useEffect(() => {
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
     startQuizAttempt(categoryId, questions.length).then((id) => {
       setAttemptId(id);
     });
